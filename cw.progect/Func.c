@@ -35,12 +35,13 @@ int sum_vectors(int n1, int* vector_1, int n2,
   int* vector_2, int** vector_3)
 {
   int i, nsum, n3 = 0;
-  printf("Vector sum: ");
+  printf("Vector sum: \n");
   if (n1 >= n2)
     n3 = n1;
   else
     n3 = n2;
   *vector_3 = (int*)malloc(n3 * sizeof(int));
+  printf("(\t");
   if (n1 >= n2)
   {
     nsum = n2;
@@ -49,14 +50,15 @@ int sum_vectors(int n1, int* vector_1, int n2,
       if (i < nsum)
       {
         (*vector_3)[i] = (int)vector_1[i] + (int)vector_2[i];
-        printf("%d ", (int)((*vector_3)[i]));
+        printf("%d\t", (int)((*vector_3)[i]));
       }
       else
       {
         (*vector_3)[i] = (int)vector_1[i];
-        printf("%d ", (int)((*vector_3)[i]));
+        printf("(%d\t", (int)((*vector_3)[i]));
       }
     }
+    printf(")");
   }
   else
   {

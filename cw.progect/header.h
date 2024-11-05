@@ -3,7 +3,7 @@
 
 int create_vector(int* count, int** vector);
 
-int sum_vectors(int n1, int* vector_1, int n2, 
+int sum_vectors(int n1, int* vector_1, int n2,
 	int* vector_2, int** vector_3);
 
 int mul_vectors(int n1, int* vector_1, int n2, int* vector_2);

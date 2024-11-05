@@ -55,7 +55,8 @@ int main()
 				print_for_vector(count_2, vector_2);
 				printf("\t    *\n");
 				print_for_vector(count, vector);
-				printf("Sum = %d\n", mul_vectors(count, vector, count_2, vector_2)); 
+				printf("Result:\n");
+				printf("Multiplication = %d\n", mul_vectors(count, vector, count_2, vector_2)); 
 				system("pause");
 				// функция
 				break;
