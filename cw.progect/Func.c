@@ -1,5 +1,4 @@
-//
-#define _USE_MATH_DEFINES
+﻿#define _USE_MATH_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <time.h>
@@ -55,10 +54,9 @@ int sum_vectors(int n1, int* vector_1, int n2,
       else
       {
         (*vector_3)[i] = (int)vector_1[i];
-        printf("(%d\t", (int)((*vector_3)[i]));
+        printf("%d\t", (int)((*vector_3)[i]));
       }
     }
-    printf(")");
   }
   else
   {
@@ -77,7 +75,7 @@ int sum_vectors(int n1, int* vector_1, int n2,
       }
     }
   }
-  printf("\n");
+  printf(")\n");
   return 0;
 }
 
@@ -133,6 +131,11 @@ void create_matrix(int* columns, int* strings, int*** matrix)
   scanf("%d", columns);
   printf("Enter quantity strings: ");
   scanf("%d", strings);
+  if ((*columns < 2) || (*strings < 2))
+  {
+    printf("Eror");
+    exit(0);
+  }
   (*matrix) = (int**)malloc(sizeof(int*) * *columns);
   for (int counter = 0; counter < *columns; counter++)
   {
@@ -156,15 +159,14 @@ void create_vector_matrix(int* columns, int* strings, int*** matrix)
   {
     (*matrix)[counter] = (int*)malloc(sizeof(int) * *strings);
   }
-
   for (int counter1 = 0; counter1 < *columns; counter1++)
   {
     for (int counter2 = 0; counter2 < *strings; counter2++)
     {
-      if (counter2 % 2 == 0)
+      if(counter2 < 1)
         (*matrix)[counter1][counter2] = rand() % 10;
       else
-        (*matrix)[counter1][counter2] = 0;
+        (*matrix)[counter1][counter2] = 1;
     }
   }
 }
@@ -192,6 +194,31 @@ void Sum_matrix(int** matrix_1, int** matrix_2, int columns_1, int string_1,
     for (counter_2 = 0; counter_2 < string_2; counter_2++)
     {
       (*matrix)[counter_1][counter_2] = matrix_1[counter_1][counter_2] + matrix_2[counter_1][counter_2];
+    }
+  }
+}
+void Sum_matrix_vector(int** matrix_1, int** matrix_2, int columns_1, int string_1,
+  int columns_2, int string_2, int*** matrix)
+{
+  int counter_1, counter_2, columns_res, string_res;
+  if (columns_1 != columns_2 || string_1 != string_2)
+  {
+    printf("Eror\n");
+    exit(1);
+  }
+  (*matrix) = (int**)malloc(sizeof(int*) * columns_1);
+  for (int counter = 0; counter < columns_1; counter++)
+  {
+    (*matrix)[counter] = (int*)malloc(sizeof(int) * string_1);
+  }
+  for (counter_1 = 0; counter_1 < columns_1; counter_1++)
+  {
+    for (counter_2 = 0; counter_2 < string_2; counter_2++)
+    {
+      if (counter_2 < 1)
+        (*matrix)[counter_1][counter_2] = matrix_1[counter_1][counter_2] + matrix_2[counter_1][counter_2];
+      else
+        (*matrix)[counter_1][counter_2] = matrix_1[counter_1][counter_2];
     }
   }
 }
@@ -287,4 +314,199 @@ void print_for_vector(int n, int* vector)
   for (counter = 0; counter < n; counter++)
     printf("%d\t", vector[counter]);
   printf(")\n");
+}
+
+void print_for_extended_matrix(int order, int** matrix, int* b_vector)
+{
+  int counter1, counter2;
+  for (int counter1 = 0; counter1 < order; counter1++)
+  {
+    if (counter1 == 0)
+      printf("/\t");
+    else if (counter1 + 1 == order)
+      printf("\\\t");
+    else
+      printf("|\t");
+    for (int counter2 = 0; counter2 < order; counter2++)
+    {
+      printf("%d\t", (matrix)[counter1][counter2]);
+    }
+    printf("|\t%d\t", b_vector[counter1]);
+    if (counter1 == 0)
+      printf("\\\t\n");
+    else if (counter1 + 1 == order)
+      printf("/\t\n");
+    else
+      printf("|\t\n");
+  }
+}
+void new_matrix_for_determinant(int string, int column, int order, int** matrix, int*** new_matrix)
+{
+  int counter1, counter2, new_counter1 = 0, new_counter2;
+  (*new_matrix) = (int**)malloc(sizeof(int*) * (order - 1));
+  for (counter1 = 0; counter1 < order - 1; counter1++)
+    (*new_matrix)[counter1] = (int*)malloc(sizeof(int) * (order - 1));
+  for (counter2 = 0; counter2 < order; counter2++)
+  {
+    if (counter2 != column)
+    {
+      new_counter2 = 0;
+      for (counter1 = 0; counter1 < order; counter1++)
+      {
+        if (counter1 != string)
+        {
+          (*new_matrix)[new_counter2][new_counter1] = matrix[counter1][counter2];
+          new_counter2++;
+        }
+      }
+      new_counter1++;
+    }
+  }
+}
+
+int determinant(int order, int** matrix)
+{
+  int counter1, counter2, det = 0;
+  int** new_matrix;
+  if (order == 2)
+    return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+  else
+  {
+    for (counter1 = 0; counter1 < order; counter1++)
+    {
+      new_matrix_for_determinant(counter1,order , order, matrix, &new_matrix);
+      det += matrix[counter1][0] * determinant(order - 1, new_matrix) * pow(-1, counter1);
+    }
+    return det;
+  }
+}
+
+void create_matrix_for_cramer(int*** matrix_for_cramer, int** matrix, int* b_vector, int order, int column)
+{
+  int counter;
+  int counter2, counter1;
+  (*matrix_for_cramer) = (int**)malloc(sizeof(int*) * order);
+  for (counter1 = 0; counter1 < order; counter1++)
+    (*matrix_for_cramer)[counter1] = (int*)malloc(sizeof(int) * order);
+  for (counter1 = 0; counter1 < order; counter1++)
+  {
+    for (counter2 = 0; counter2 < order; counter2++)
+    {
+      (*matrix_for_cramer)[counter1][counter2] = matrix[counter1][counter2];
+    }
+  }
+
+  for (counter = 0; counter < order; counter++)
+    (*matrix_for_cramer)[counter][column] = b_vector[counter];
+}
+void cramer(int** matrix, int* b_vector, int order)
+{
+  int counter, determinant_of_matrix;
+  int** matrix_for_cramer;
+  determinant_of_matrix = determinant(order, matrix);
+  for (counter = 0; counter < order; counter++)
+  {
+    create_matrix_for_cramer(&matrix_for_cramer, matrix, b_vector, order, counter);
+    printf("\n");
+    print_for_matrix(order, order, matrix_for_cramer);
+    printf("x[%d] = %d/%d\n", counter, determinant(order, matrix_for_cramer), determinant_of_matrix);
+    free_matrix(order, matrix_for_cramer);
+  }
+}
+void create_inverse_of_the_matrix(int order, int** matrix, double*** inverse_matrix)
+{
+  int counter2, counter1;
+  int** det_matrix;
+  int det = determinant(order, matrix);
+  (*inverse_matrix) = (double**)malloc(sizeof(double*) * order);
+  for (counter1 = 0; counter1 < order; counter1++)
+    (*inverse_matrix)[counter1] = (double*)malloc(sizeof(double) * order);
+
+  for (counter1 = 0; counter1 < order; counter1++)
+  {
+    for (counter2 = 0; counter2 < order; counter2++)
+    {
+      new_matrix_for_determinant(counter1, counter2, order, matrix, &det_matrix);
+      (*inverse_matrix)[counter2][counter1] = (determinant(order - 1, det_matrix) * pow(-1, counter1 + counter2)) / (double)det;
+      free_matrix(order - 1, det_matrix);
+    }
+  }
+}
+void print_for_double_matrix(int columns, int strings, double** matrix)
+{
+  int counter1, counter2;
+  for (int counter1 = 0; counter1 < columns; counter1++)
+  {
+    if (counter1 == 0)
+      printf("/\t");
+    else if (counter1 + 1 == columns)
+      printf("\\\t");
+    else
+      printf("|\t");
+    for (int counter2 = 0; counter2 < strings; counter2++)
+    {
+      printf("%lf\t", (matrix)[counter1][counter2]);
+    }
+    if (counter1 == 0)
+      printf("\\\t\n");
+    else if (counter1 + 1 == columns)
+      printf("/\t\n");
+    else
+      printf("|\t\n");
+  }
+}
+void free_double_matrix(int columns, double** matrix)
+{
+  for (int counter = 0; counter < columns; counter++)
+    free(matrix[counter]);
+  free(matrix);
+}
+double Gölderova_norm(int* array, int len_of_array, int norm)
+{
+  double res = 0;
+  int counter = 0;
+  for (counter = 0; counter < len_of_array; counter++)
+    res += pow(abs(array[counter]), norm);
+  res = pow(res, (1.0 / norm));
+  return res;
+}
+int Endless_norm(int* array, int len_of_array, int left, int right)
+{
+  int res = 0;
+  Quick_Sort(array, left, right);
+  res = array[right];
+  return res;
+}
+void Quick_Sort(int* array, int left, int right)
+{
+  int pivot; 
+  int index; 
+  int l_hold = left; 
+  int r_hold = right; 
+  pivot = array[left];
+  while (left < right) 
+  {
+    while ((array[right] > pivot) && (left < right))
+      right--; 
+    if (left != right) 
+    {
+      array[left] = array[right]; 
+      left++;
+    }
+    while ((array[left] < pivot) && (left < right))
+      left++; 
+    if (left != right) 
+    {
+      array[right] = array[left]; 
+      right--; 
+    }
+  }
+  array[left] = pivot; 
+  index = left;
+  left = l_hold;
+  right = r_hold;
+  if (left < index)
+    Quick_Sort(array, left, index - 1);
+  if (right > index)
+    Quick_Sort(array, index + 1, right);
 }
